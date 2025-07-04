@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id         String      @id @default(uuid())
+  name       String
+  email      String      @unique
+  password   String
+  classrooms Classroom[]
+  students   Student[]   @relation("TeacherStudents")
+  createdAt  DateTime    @default(now())
+}
+
+model Classroom {
+  id        String             @id @default(uuid())
+  name      String
+  teacher   Teacher            @relation(fields: [teacherId], references: [id])
+  teacherId String
+  students  StudentClassroom[]
+  createdAt DateTime           @default(now())
+}
+
+model Student {
+  id         String             @id @default(uuid())
+  name       String
+  email      String             @unique
+  teacher    Teacher            @relation("TeacherStudents", fields: [teacherId], references: [id])
+  teacherId  String
+  classrooms StudentClassroom[]
+  createdAt  DateTime           @default(now())
+}
+
+model StudentClassroom {
+  id          String    @id @default(uuid())
+  student     Student   @relation(fields: [studentId], references: [id])
+  studentId   String
+  classroom   Classroom @relation(fields: [classroomId], references: [id])
+  classroomId String
+  score       Float?
+}
