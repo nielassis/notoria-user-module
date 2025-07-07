@@ -13,5 +13,5 @@ export function generateToken(teacher: Teacher) {
     }
   );
 
-  return token;
+  return `Bearer ${token}`;
 }
