@@ -18,12 +18,14 @@ export async function verifyJWT(request: FastifyRequest, reply: FastifyReply) {
       sub: string;
       email?: string;
       name?: string;
+      role: string;
     };
 
     request.user = {
       id: decoded.sub,
       email: decoded.email,
       name: decoded.name,
+      role: decoded.role,
     };
   } catch (err) {
     return reply.status(401).send({ error: "Token inválido ou expirado" });
