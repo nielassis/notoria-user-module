@@ -6,6 +6,12 @@ import {
 import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma";
 import { generateToken } from "../services/authTeacher.service";
+import {
+  createStudentSchema,
+  updateStudentSchema,
+} from "../objects/student.schema";
+import { generatePassword } from "../lib/generateStudentPassword";
+import { StudentIdParams } from "../interfaces/student.interfaces";
 
 export async function createTeacher(
   request: FastifyRequest,
@@ -187,6 +193,180 @@ export async function teacherUpdate(
     return reply.status(200).send(updatedTeacher);
   } catch (error) {
     console.error("Erro ao atualizar professor:", error);
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+}
+
+// ações do professor -> estudantes
+
+export async function createStudent(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const { id } = request.user;
+
+  if (request.user.role !== "teacher") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  const parsedBody = createStudentSchema.safeParse(request.body);
+
+  if (!parsedBody.success) {
+    return reply.status(400).send({
+      error: "Dados inválidos",
+      details: parsedBody.error.flatten(),
+    });
+  }
+
+  const { name, email } = parsedBody.data;
+  const teacherId = request.user.id;
+
+  try {
+    const existingStudent = await prisma.student.findUnique({
+      where: { email },
+    });
+
+    if (existingStudent) {
+      return reply.status(409).send({ error: "Email ja cadastrado" });
+    }
+
+    const plainPassword = generatePassword();
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    const student = await prisma.student.create({
+      data: {
+        password: hashedPassword,
+        name,
+        email,
+        teacherId,
+      },
+    });
+
+    return reply
+      .status(201)
+      .send({ student, temporaryPassword: plainPassword });
+  } catch (error) {
+    return reply
+      .status(500)
+      .send({ error: "Erro interno do servidor ao criar aluno" });
+  }
+}
+
+export async function getAllStudents(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const { id } = request.user;
+
+  if (request.user.role !== "teacher") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const students = await prisma.student.findMany({
+      where: { teacherId: id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+    return reply.status(200).send(students);
+  } catch (error) {
+    return reply
+      .status(500)
+      .send({ error: "Erro interno do servidor ao buscar alunos" });
+  }
+}
+
+export async function updateStudent(
+  request: FastifyRequest<{
+    Params: StudentIdParams;
+  }>,
+  reply: FastifyReply
+) {
+  const { id } = request.user;
+  const { studentId } = request.params;
+
+  if (request.user.role !== "teacher") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  const parsedBody = updateStudentSchema.safeParse(request.body);
+
+  if (!parsedBody.success) {
+    return reply.status(400).send({
+      error: "Dados inválidos",
+      details: parsedBody.error.flatten(),
+    });
+  }
+
+  const { name, email, newPassword } = parsedBody.data;
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id: studentId },
+    });
+
+    if (!student) {
+      return reply.status(404).send({ error: "Aluno nao encontrado" });
+    }
+
+    const dataToUpdate = {
+      ...(name && { name }),
+      ...(email && { email }),
+      ...(newPassword && { password: await bcrypt.hash(newPassword, 10) }),
+    };
+
+    const updatedStudent = await prisma.student.update({
+      where: { id: studentId },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+    return reply.status(200).send({ updatedStudent, success: true });
+  } catch (error) {
+    console.error("Erro ao atualizar aluno:", error);
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+}
+
+export async function deleteStudent(
+  request: FastifyRequest<{
+    Params: StudentIdParams;
+  }>,
+  reply: FastifyReply
+) {
+  const { id } = request.user;
+  const { studentId } = request.params;
+
+  if (request.user.role !== "teacher") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id: studentId },
+    });
+
+    if (!student) {
+      return reply.status(404).send({ error: "Aluno nao encontrado" });
+    }
+
+    await prisma.student.delete({
+      where: { id: studentId },
+    });
+
+    return reply.status(200).send({
+      success: true,
+      message: "Aluno deletado com sucesso",
+    });
+  } catch (error) {
+    console.error("Erro ao deletar aluno:", error);
     return reply.status(500).send({ error: "Erro interno do servidor" });
   }
 }
