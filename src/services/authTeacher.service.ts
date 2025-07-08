@@ -6,7 +6,12 @@ const SECRET = env.SECRET;
 
 export function generateToken(teacher: Teacher) {
   const token = jwt.sign(
-    { sub: teacher.id, email: teacher.email, name: teacher.name },
+    {
+      sub: teacher.id,
+      email: teacher.email,
+      name: teacher.name,
+      role: "teacher",
+    },
     SECRET,
     {
       expiresIn: "7d",
