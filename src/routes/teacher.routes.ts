@@ -11,8 +11,8 @@ import {
 } from "../controllers/teacher.controller";
 import { verifyJWT } from "../middlewares/verifyJWT";
 
-export async function teacherRoutes(server: FastifyInstance) {
-  server.post("/create", createTeacher);
+export default async function teacherRoutes(server: FastifyInstance) {
+  server.post("/", createTeacher);
 
   server.post("/login", teacherLogin);
 
@@ -37,5 +37,3 @@ export async function teacherRoutes(server: FastifyInstance) {
     privateRoutes.delete("/student/:studentId", deleteStudent);
   });
 }
-
-export default teacherRoutes;
