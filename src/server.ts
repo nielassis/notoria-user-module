@@ -2,6 +2,7 @@ import fastify from "fastify";
 import { env } from "./config/env";
 import teacherRoutes from "./routes/teacher.routes";
 import studentRoutes from "./routes/students.routes";
+import classroomRoutes from "./routes/classrooms.routes";
 
 const app = fastify();
 
@@ -14,6 +15,7 @@ const port = Number(env.PORT);
 async function main() {
   app.register(teacherRoutes, { prefix: "/teacher" });
   app.register(studentRoutes, { prefix: "/student" });
+  app.register(classroomRoutes, { prefix: "/classroom" });
 
   try {
     await app.listen({ port });
