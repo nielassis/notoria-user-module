@@ -219,11 +219,11 @@ export async function createStudent(
   }
 
   const { name, email } = parsedBody.data;
-  const teacherId = request.user.id;
+  const teacherId = id;
 
   try {
     const existingStudent = await prisma.student.findUnique({
-      where: { email },
+      where: { email, teacherId },
     });
 
     if (existingStudent) {
@@ -305,7 +305,7 @@ export async function updateStudent(
 
   try {
     const student = await prisma.student.findUnique({
-      where: { id: studentId },
+      where: { id: studentId, teacherId: id },
     });
 
     if (!student) {
@@ -319,10 +319,9 @@ export async function updateStudent(
     };
 
     const updatedStudent = await prisma.student.update({
-      where: { id: studentId },
+      where: { id: studentId, teacherId: id },
       data: dataToUpdate,
       select: {
-        id: true,
         name: true,
         email: true,
         createdAt: true,
@@ -358,7 +357,7 @@ export async function deleteStudent(
     }
 
     await prisma.student.delete({
-      where: { id: studentId },
+      where: { id: studentId, teacherId: id },
     });
 
     return reply.status(200).send({
