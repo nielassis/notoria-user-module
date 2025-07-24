@@ -25,7 +25,15 @@ export async function createTeacher(
       .send({ error: "Dados inválidos", details: body.error.flatten() });
   }
 
-  const { name, email, password } = body.data;
+  const {
+    name,
+    email,
+    password,
+    phone,
+    discipline,
+    educationalInstitution,
+    experience,
+  } = body.data;
 
   try {
     const existingEmail = await prisma.teacher.findUnique({
@@ -44,6 +52,10 @@ export async function createTeacher(
       data: {
         name,
         email,
+        phone,
+        discipline,
+        educationalInstitution,
+        experience,
         password: hashedPassword,
       },
       select: {
@@ -110,6 +122,10 @@ export async function teacherProfile(
         id: true,
         name: true,
         email: true,
+        phone: true,
+        discipline: true,
+        educationalInstitution: true,
+        experience: true,
         createdAt: true,
       },
     });
@@ -139,9 +155,26 @@ export async function teacherUpdate(
     });
   }
 
-  const { name, email, oldPassword, newPassword } = parsedBody.data;
+  const {
+    name,
+    email,
+    phone,
+    discipline,
+    educationalInstitution,
+    experience,
+    oldPassword,
+    newPassword,
+  } = parsedBody.data;
 
-  if (!name && !email && !newPassword) {
+  if (
+    !name &&
+    !email &&
+    !phone &&
+    !discipline &&
+    !educationalInstitution &&
+    !experience &&
+    !newPassword
+  ) {
     return reply
       .status(400)
       .send({ error: "Nenhum dado fornecido para atualização" });
@@ -154,10 +187,23 @@ export async function teacherUpdate(
       return reply.status(404).send({ error: "Usuário não encontrado" });
     }
 
-    const updateData: { name?: string; email?: string; password?: string } = {};
+    const updateData: {
+      name?: string;
+      email?: string;
+      password?: string;
+      phone?: string;
+      discipline?: string;
+      educationalInstitution?: string;
+      experience?: string;
+    } = {};
 
     if (name) updateData.name = name;
     if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (discipline) updateData.discipline = discipline;
+    if (educationalInstitution)
+      updateData.educationalInstitution = educationalInstitution;
+    if (experience) updateData.experience = experience;
 
     if (newPassword) {
       if (!oldPassword) {
@@ -187,6 +233,10 @@ export async function teacherUpdate(
         name: true,
         email: true,
         createdAt: true,
+        phone: true,
+        discipline: true,
+        educationalInstitution: true,
+        experience: true,
       },
     });
 
