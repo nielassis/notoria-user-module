@@ -11,12 +11,12 @@ export default async function studentRoutes(server: FastifyInstance) {
   server.post("/login", studentLogin);
 
   server.register(async (privateRoutes) => {
-    server.addHook("onRequest", verifyJWT);
+    privateRoutes.addHook("onRequest", verifyJWT);
 
-    server.put("/change-password", changeStudentPassword);
+    privateRoutes.put("/change-password", changeStudentPassword);
 
-    server.get("/classrooms", getAllStudentClassroom);
+    privateRoutes.get("/classrooms", getAllStudentClassroom);
 
-    server.get("/classrooms/:classroomId", getAllStudentsInClassroom);
+    privateRoutes.get("/classrooms/:classroomId", getAllStudentsInClassroom);
   });
 }
