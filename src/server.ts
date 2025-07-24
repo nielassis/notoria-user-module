@@ -1,10 +1,15 @@
 import fastify from "fastify";
+import cors from "@fastify/cors";
 import { env } from "./config/env";
 import teacherRoutes from "./routes/teacher.routes";
 import studentRoutes from "./routes/students.routes";
 import classroomRoutes from "./routes/classrooms.routes";
 
 const app = fastify();
+
+app.register(cors, {
+  origin: env.FRONT_END_URL,
+});
 
 app.get("/health", async () => {
   return { status: "ok" };
