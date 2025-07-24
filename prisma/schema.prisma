@@ -9,13 +9,17 @@ datasource db {
 }
 
 model Teacher {
-  id         String      @id @default(uuid())
-  name       String
-  email      String      @unique
-  password   String
-  classrooms Classroom[]
-  students   Student[]   @relation("TeacherStudents")
-  createdAt  DateTime    @default(now())
+  id                     String      @id @default(uuid())
+  name                   String
+  email                  String      @unique
+  password               String
+  phone                  String      @unique
+  discipline             String
+  educationalInstitution String
+  experience             String      @db.VarChar(100)
+  classrooms             Classroom[]
+  students               Student[]   @relation("TeacherStudents")
+  createdAt              DateTime    @default(now())
 }
 
 model Classroom {
