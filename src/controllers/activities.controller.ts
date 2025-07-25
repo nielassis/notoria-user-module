@@ -262,6 +262,63 @@ export async function gradeSubmission(
   }
 }
 
+export async function listAllSubmissionsByTeacher(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const teacherId = request.user.id;
+
+  if (request.user.role !== "teacher") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const activities = await prisma.activity.findMany({
+      where: { teacherId },
+      select: { id: true },
+    });
+
+    const activityIds = activities.map((a) => a.id);
+
+    if (activityIds.length === 0) {
+      return reply.send({ graded: [], pending: [] });
+    }
+
+    const submissions = await prisma.activitySubmission.findMany({
+      where: {
+        activityId: {
+          in: activityIds,
+        },
+      },
+      include: {
+        student: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        activity: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+      orderBy: {
+        submittedAt: "desc",
+      },
+    });
+
+    const completed = submissions.filter((s) => s.status === "COMPLETED");
+    const pending = submissions.filter((s) => s.status === "PENDING");
+
+    return reply.send({ completed, pending });
+  } catch (error) {
+    console.error("Erro ao buscar todas as submissões do professor:", error);
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+}
+
 export async function listSubmissionsByActivity(
   request: FastifyRequest<{ Params: AcitivityIdParams }>,
   reply: FastifyReply
@@ -428,10 +485,8 @@ export async function submitActivity(
       content,
     };
 
-    if (status === "COMPLETED") {
-      updateData.status = "COMPLETED";
-      updateData.submittedAt = new Date();
-    }
+    updateData.status = "COMPLETED";
+    updateData.submittedAt = new Date();
 
     const submission = await prisma.activitySubmission.updateMany({
       where: {

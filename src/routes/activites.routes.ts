@@ -8,6 +8,7 @@ import {
   getAllStudentActivities,
   getStudentActivitiesByClassroom,
   gradeSubmission,
+  listAllSubmissionsByTeacher,
   listSubmissionsByActivity,
   submitActivity,
   updateActivity,
@@ -24,6 +25,7 @@ export default async function activitiesRoutes(server: FastifyInstance) {
     privateRoutes.delete("/:activityId", deleteActivity);
 
     // professor -> submissoes de atividades
+    privateRoutes.get("/submissions", listAllSubmissionsByTeacher);
     privateRoutes.get("/:activityId/submissions", listSubmissionsByActivity);
     privateRoutes.patch("/submission/:submissionId/grade", gradeSubmission);
 
@@ -35,10 +37,7 @@ export default async function activitiesRoutes(server: FastifyInstance) {
 
     privateRoutes.get("/student/activities", getAllStudentActivities);
 
-    privateRoutes.patch(
-      "/student/activities/:activityId/submissions",
-      submitActivity
-    );
+    privateRoutes.patch("/student/:activityId/submissions", submitActivity);
 
     privateRoutes.delete(
       "/student/activities/:activityId/submissions",
