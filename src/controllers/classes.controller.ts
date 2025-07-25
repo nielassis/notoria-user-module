@@ -250,6 +250,7 @@ export async function getStudentsInClassroom(
           select: {
             id: true,
             name: true,
+            email: true,
           },
         },
         score: true,

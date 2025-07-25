@@ -92,7 +92,13 @@ export async function getClassroomById(
       },
     });
 
-    return reply.status(200).send(classroom);
+    const studentCount = await prisma.studentClassroom.count({
+      where: {
+        classroomId: classroomId,
+      },
+    });
+
+    return reply.status(200).send({ classroom, count: studentCount });
   } catch (error) {
     return reply.status(500).send({ error: "Erro interno do servidor" });
   }
