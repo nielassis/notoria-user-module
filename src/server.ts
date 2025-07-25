@@ -4,11 +4,13 @@ import { env } from "./config/env";
 import teacherRoutes from "./routes/teacher.routes";
 import studentRoutes from "./routes/students.routes";
 import classroomRoutes from "./routes/classrooms.routes";
+import activitiesRoutes from "./routes/activites.routes";
 
 const app = fastify();
 
 app.register(cors, {
   origin: env.FRONT_END_URL,
+  methods: ["GET", "POST", "PUT", "DELETE"],
 });
 
 app.get("/health", async () => {
@@ -21,6 +23,7 @@ async function main() {
   app.register(teacherRoutes, { prefix: "/teacher" });
   app.register(studentRoutes, { prefix: "/student" });
   app.register(classroomRoutes, { prefix: "/classroom" });
+  app.register(activitiesRoutes, { prefix: "/activities" });
 
   try {
     await app.listen({ port });

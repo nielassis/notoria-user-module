@@ -19,27 +19,30 @@ model Teacher {
   experience             String      @db.VarChar(100)
   classrooms             Classroom[]
   students               Student[]   @relation("TeacherStudents")
+  activities             Activity[]
   createdAt              DateTime    @default(now())
 }
 
 model Classroom {
-  id        String             @id @default(uuid())
-  name      String
-  teacher   Teacher            @relation(fields: [teacherId], references: [id])
-  teacherId String
-  students  StudentClassroom[]
-  createdAt DateTime           @default(now())
+  id         String             @id @default(uuid())
+  name       String
+  teacher    Teacher            @relation(fields: [teacherId], references: [id])
+  teacherId  String
+  students   StudentClassroom[]
+  activities Activity[]
+  createdAt  DateTime           @default(now())
 }
 
 model Student {
-  id         String             @id @default(uuid())
-  name       String
-  email      String             @unique
-  password   String
-  teacher    Teacher            @relation("TeacherStudents", fields: [teacherId], references: [id])
-  teacherId  String
-  classrooms StudentClassroom[]
-  createdAt  DateTime           @default(now())
+  id          String               @id @default(uuid())
+  name        String
+  email       String               @unique
+  password    String
+  teacher     Teacher              @relation("TeacherStudents", fields: [teacherId], references: [id])
+  teacherId   String
+  classrooms  StudentClassroom[]
+  submissions ActivitySubmission[]
+  createdAt   DateTime             @default(now())
 }
 
 model StudentClassroom {
@@ -49,4 +52,43 @@ model StudentClassroom {
   classroom   Classroom @relation(fields: [classroomId], references: [id])
   classroomId String
   score       Float?
+}
+
+model Activity {
+  id          String               @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  type        ActivityType
+  classroomId String
+  classroom   Classroom            @relation(fields: [classroomId], references: [id])
+  teacherId   String
+  teacher     Teacher              @relation(fields: [teacherId], references: [id])
+  fileUrl     String?
+  createdAt   DateTime             @default(now())
+  submissions ActivitySubmission[] 
+}
+
+model ActivitySubmission {
+  id          String           @id @default(uuid())
+  student     Student          @relation(fields: [studentId], references: [id])
+  studentId   String
+  activity    Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId  String
+  submittedAt DateTime?
+  fileUrl     String?
+  content     String?
+  grade       Float?
+  status      SubmissionStatus @default(PENDING)
+}
+
+enum ActivityType {
+  ASSIGNMENT
+  EXERCISE
+  COMPLEMENTARY_MATERIAL
+}
+
+enum SubmissionStatus {
+  PENDING
+  COMPLETED
 }
