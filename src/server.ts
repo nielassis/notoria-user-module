@@ -10,7 +10,7 @@ const app = fastify();
 
 app.register(cors, {
   origin: env.FRONT_END_URL,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 });
 
 app.get("/health", async () => {
