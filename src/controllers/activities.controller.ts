@@ -369,6 +369,53 @@ export async function listSubmissionsByActivity(
   }
 }
 
+export async function getSubmissionById(
+  request: FastifyRequest<{ Params: { submissionId: string } }>,
+  reply: FastifyReply
+) {
+  const { submissionId } = request.params;
+  const { id } = request.user;
+
+  if (request.user.role !== "teacher") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const submission = await prisma.activitySubmission.findUnique({
+      where: { id: submissionId },
+      select: {
+        id: true,
+        submittedAt: true,
+        fileUrl: true,
+        content: true,
+        grade: true,
+        status: true,
+        student: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        activity: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    if (!submission) {
+      return reply.status(404).send({ error: "Submissão não encontrada" });
+    }
+
+    return reply.send(submission);
+  } catch (error) {
+    console.error("Erro ao buscar submissão:", error);
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+}
+
 // ações do aluno -> atividades
 
 export async function getStudentActivitiesByClassroom(

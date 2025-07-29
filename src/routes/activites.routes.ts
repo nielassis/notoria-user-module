@@ -7,6 +7,7 @@ import {
   getActivitiesByClassroom,
   getAllStudentActivities,
   getStudentActivitiesByClassroom,
+  getSubmissionById,
   gradeSubmission,
   listAllSubmissionsByTeacher,
   listSubmissionsByActivity,
@@ -27,6 +28,7 @@ export default async function activitiesRoutes(server: FastifyInstance) {
     // professor -> submissoes de atividades
     privateRoutes.get("/submissions", listAllSubmissionsByTeacher);
     privateRoutes.get("/:activityId/submissions", listSubmissionsByActivity);
+    privateRoutes.get("/submission/:submissionId", getSubmissionById);
     privateRoutes.patch("/submission/:submissionId/grade", gradeSubmission);
 
     // alunos -> atividades
