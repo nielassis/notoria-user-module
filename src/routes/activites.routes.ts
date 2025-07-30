@@ -43,7 +43,7 @@ export default async function activitiesRoutes(server: FastifyInstance) {
       getStudentActivitiesByClassroom
     );
 
-    privateRoutes.get("/student", getAllStudentActivities);
+    privateRoutes.get("/student/submissions", getAllStudentActivities);
 
     privateRoutes.get("/student/:classroomId", getAllClassroomStudentAcivities);
 

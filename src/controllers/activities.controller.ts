@@ -494,7 +494,7 @@ export async function getAllStudentActivities(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const studentId = request.user.id;
+  const { id } = request.user;
 
   if (request.user.role !== "student") {
     return reply.status(403).send({ error: "Acesso negado" });
@@ -502,9 +502,18 @@ export async function getAllStudentActivities(
 
   try {
     const submissions = await prisma.activitySubmission.findMany({
-      where: { studentId },
+      where: {
+        studentId: id,
+      },
       include: {
-        activity: true,
+        activity: {
+          select: {
+            id: true,
+            title: true,
+            dueDate: true,
+            type: true,
+          },
+        },
       },
     });
 
