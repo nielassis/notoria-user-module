@@ -7,6 +7,7 @@ import {
 } from "../objects/activity.schema";
 import prisma from "../lib/prisma";
 import { AcitivityIdParams } from "../interfaces/activity.interface";
+import { StudentIdParams } from "../interfaces/student.interfaces";
 
 // ações professor -> atividades
 export async function createActivity(
@@ -416,6 +417,43 @@ export async function getSubmissionById(
   }
 }
 
+export async function getStudentsSubmissionInClassroom(
+  request: FastifyRequest<{ Params: StudentIdParams & ClassroomIdParams }>,
+  reply: FastifyReply
+) {
+  const { classroomId, studentId } = request.params;
+  const teacherId = request.user.id;
+
+  if (request.user.role !== "teacher") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const activity = await prisma.activitySubmission.findMany({
+      where: {
+        activity: {
+          classroomId,
+          teacherId,
+        },
+        studentId,
+      },
+    });
+
+    if (!activity) {
+      return reply.status(404).send({ error: "Submissão nao encontrada" });
+    }
+
+    return reply.send(activity);
+  } catch (error) {
+    console.error("Erro ao buscar submissão:", error);
+    return reply.status(500).send({
+      error: {
+        message: "Erro interno do servidor",
+      },
+    });
+  }
+}
+
 // ações do aluno -> atividades
 
 export async function getStudentActivitiesByClassroom(
@@ -552,6 +590,53 @@ export async function submitActivity(
     return reply.send({ success: true });
   } catch (error) {
     console.error("Erro ao enviar atividade:", error);
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+}
+
+export async function getAllClassroomStudentAcivities(
+  request: FastifyRequest<{ Params: ClassroomIdParams }>,
+  reply: FastifyReply
+) {
+  const { classroomId } = request.params;
+
+  const user = request.user;
+  if (!user || user.role !== "student") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const activities = await prisma.activitySubmission.findMany({
+      where: {
+        studentId: user.id,
+        activity: {
+          classroomId,
+        },
+      },
+      select: {
+        id: true,
+        studentId: true,
+        activityId: true,
+        submittedAt: true,
+        fileUrl: true,
+        content: true,
+        grade: true,
+        status: true,
+
+        activity: {
+          select: {
+            id: true,
+            title: true,
+            dueDate: true,
+            type: true,
+          },
+        },
+      },
+    });
+
+    return reply.send(activities);
+  } catch (error) {
+    console.error("Erro ao buscar atividades do aluno:", error);
     return reply.status(500).send({ error: "Erro interno do servidor" });
   }
 }

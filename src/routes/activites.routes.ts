@@ -5,8 +5,10 @@ import {
   deleteActivity,
   deleteStudentActivity,
   getActivitiesByClassroom,
+  getAllClassroomStudentAcivities,
   getAllStudentActivities,
   getStudentActivitiesByClassroom,
+  getStudentsSubmissionInClassroom,
   getSubmissionById,
   gradeSubmission,
   listAllSubmissionsByTeacher,
@@ -29,6 +31,10 @@ export default async function activitiesRoutes(server: FastifyInstance) {
     privateRoutes.get("/submissions", listAllSubmissionsByTeacher);
     privateRoutes.get("/:activityId/submissions", listSubmissionsByActivity);
     privateRoutes.get("/submission/:submissionId", getSubmissionById);
+    privateRoutes.get(
+      "/submissions/:classroomId/:studentId",
+      getStudentsSubmissionInClassroom
+    );
     privateRoutes.patch("/submission/:submissionId/grade", gradeSubmission);
 
     // alunos -> atividades
@@ -37,7 +43,9 @@ export default async function activitiesRoutes(server: FastifyInstance) {
       getStudentActivitiesByClassroom
     );
 
-    privateRoutes.get("/student/activities", getAllStudentActivities);
+    privateRoutes.get("/student", getAllStudentActivities);
+
+    privateRoutes.get("/student/:classroomId", getAllClassroomStudentAcivities);
 
     privateRoutes.patch("/student/:activityId/submissions", submitActivity);
 
