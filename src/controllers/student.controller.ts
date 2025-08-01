@@ -181,23 +181,24 @@ export async function getClassroomById(
   reply: FastifyReply
 ) {
   const { classroomId } = request.params;
-  const { id } = request.user;
+  const { id, role } = request.user;
 
-  if (request.user.role !== "student") {
+  if (role !== "student") {
     return reply.status(403).send({ error: "Acesso negado" });
   }
 
   try {
-    const student = await prisma.studentClassroom.findFirst({
+    const studentClassroom = await prisma.studentClassroom.findFirst({
       where: {
         studentId: id,
+        classroomId: classroomId,
       },
     });
 
-    if (!student) {
+    if (!studentClassroom) {
       return reply
         .status(404)
-        .send({ error: "Aluno nao matriculado nessa turma" });
+        .send({ error: "Aluno não está matriculado nessa turma" });
     }
 
     const classroom = await prisma.classroom.findUnique({
