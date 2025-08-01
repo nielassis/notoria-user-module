@@ -173,3 +173,40 @@ export async function getAllStudentsInClassroom(
     return reply.status(500).send({ error: "Erro interno do servidor" });
   }
 }
+
+export async function getClassroomById(
+  request: FastifyRequest<{
+    Params: ClassroomIdParams;
+  }>,
+  reply: FastifyReply
+) {
+  const { classroomId } = request.params;
+  const { id } = request.user;
+
+  if (request.user.role !== "student") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const student = await prisma.studentClassroom.findFirst({
+      where: {
+        studentId: id,
+      },
+    });
+
+    if (!student) {
+      return reply
+        .status(404)
+        .send({ error: "Aluno nao matriculado nessa turma" });
+    }
+
+    const classroom = await prisma.classroom.findUnique({
+      where: { id: classroomId },
+    });
+
+    return reply.status(200).send(classroom);
+  } catch (error) {
+    console.error("Erro ao buscar turma:", error);
+    return reply.status(500).send({ error: "Erro interno do servidor" });
+  }
+}

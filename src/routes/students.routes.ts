@@ -3,6 +3,7 @@ import {
   changeStudentPassword,
   getAllStudentClassroom,
   getAllStudentsInClassroom,
+  getClassroomById,
   studentLogin,
 } from "../controllers/student.controller";
 import { verifyJWT } from "../middlewares/verifyJWT";
@@ -17,6 +18,8 @@ export default async function studentRoutes(server: FastifyInstance) {
 
     privateRoutes.get("/classrooms", getAllStudentClassroom);
 
-    privateRoutes.get("/classrooms/:classroomId", getAllStudentsInClassroom);
+    privateRoutes.get("/mates/:classroomId", getAllStudentsInClassroom);
+
+    privateRoutes.get("/classrooms/:classroomId", getClassroomById);
   });
 }
