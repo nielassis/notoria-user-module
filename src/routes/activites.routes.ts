@@ -48,7 +48,7 @@ export default async function activitiesRoutes(server: FastifyInstance) {
 
     privateRoutes.get("/student/:classroomId", getAllClassroomStudentAcivities);
 
-    privateRoutes.get("/student/:activityId", getActivityById);
+    privateRoutes.get("/student/activity/:activityId", getActivityById);
 
     privateRoutes.patch("/student/:activityId/submissions", submitActivity);
 
