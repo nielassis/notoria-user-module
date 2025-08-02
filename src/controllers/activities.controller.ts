@@ -524,6 +524,54 @@ export async function getAllStudentActivities(
   }
 }
 
+export async function getActivityById(
+  request: FastifyRequest<{ Params: AcitivityIdParams }>,
+  reply: FastifyReply
+) {
+  const { activityId } = request.params;
+  const { id } = request.user;
+
+  if (request.user.role !== "student") {
+    return reply.status(403).send({ error: "Acesso negado" });
+  }
+
+  try {
+    const student = await prisma.studentClassroom.findFirst({
+      where: {
+        studentId: id,
+        classroom: {
+          activities: {
+            some: {
+              id: activityId,
+            },
+          },
+        },
+      },
+    });
+
+    if (!student) {
+      return reply.status(404).send({ error: "Atividade nao encontrada" });
+    }
+
+    const activity = await prisma.activity.findUnique({
+      where: { id: activityId },
+    });
+
+    if (!activity) {
+      return reply.status(404).send({ error: "Atividade nao encontrada" });
+    }
+
+    return reply.send(activity);
+  } catch (error) {
+    console.error("Erro ao buscar atividade:", error);
+    return reply.status(500).send({
+      error: {
+        message: "Erro interno do servidor",
+      },
+    });
+  }
+}
+
 export async function deleteStudentActivity(
   request: FastifyRequest<{ Params: AcitivityIdParams }>,
   reply: FastifyReply

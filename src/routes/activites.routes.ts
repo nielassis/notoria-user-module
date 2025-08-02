@@ -5,6 +5,7 @@ import {
   deleteActivity,
   deleteStudentActivity,
   getActivitiesByClassroom,
+  getActivityById,
   getAllClassroomStudentAcivities,
   getAllStudentActivities,
   getStudentActivitiesByClassroom,
@@ -46,6 +47,8 @@ export default async function activitiesRoutes(server: FastifyInstance) {
     privateRoutes.get("/student/submissions", getAllStudentActivities);
 
     privateRoutes.get("/student/:classroomId", getAllClassroomStudentAcivities);
+
+    privateRoutes.get("/student/:activityId", getActivityById);
 
     privateRoutes.patch("/student/:activityId/submissions", submitActivity);
 
