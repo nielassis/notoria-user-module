@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "tsx src/server.ts",
     "build": "prisma generate && tsc",
+    "vercel-build": "prisma generate && prisma migrate deploy && tsc",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate": "prisma generate",
