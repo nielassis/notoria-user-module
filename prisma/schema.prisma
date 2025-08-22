@@ -20,6 +20,7 @@ model Teacher {
   classrooms             Classroom[]
   students               Student[]   @relation("TeacherStudents")
   activities             Activity[]
+  conversations          Conversation[]
   createdAt              DateTime    @default(now())
 }
 
@@ -42,14 +43,15 @@ model Student {
   teacherId   String
   classrooms  StudentClassroom[]
   submissions ActivitySubmission[]
+  conversations Conversation[]
   createdAt   DateTime             @default(now())
 }
 
 model StudentClassroom {
   id          String    @id @default(uuid())
-  student     Student   @relation(fields: [studentId], references: [id])
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId   String
-  classroom   Classroom @relation(fields: [classroomId], references: [id])
+  classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   classroomId String
 }
 
@@ -65,12 +67,12 @@ model Activity {
   teacher     Teacher              @relation(fields: [teacherId], references: [id])
   fileUrl     String?
   createdAt   DateTime             @default(now())
-  submissions ActivitySubmission[] 
+  submissions ActivitySubmission[]
 }
 
 model ActivitySubmission {
   id          String           @id @default(uuid())
-  student     Student          @relation(fields: [studentId], references: [id])
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId   String
   activity    Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
   activityId  String
@@ -81,13 +83,45 @@ model ActivitySubmission {
   status      SubmissionStatus @default(PENDING)
 }
 
+model Conversation {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages    Message[]
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  createdAt      DateTime     @default(now())
+
+  senderRole     Role       
+  senderId       String
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
 enum ActivityType {
   ASSIGNMENT
   EXERCISE
   COMPLEMENTARY_MATERIAL
 }
 
+
 enum SubmissionStatus {
   PENDING
   COMPLETED
+}
+
+enum Role {
+  TEACHER
+  STUDENT
 }

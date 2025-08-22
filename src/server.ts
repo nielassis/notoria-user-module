@@ -5,6 +5,7 @@ import teacherRoutes from "./routes/teacher.routes";
 import studentRoutes from "./routes/students.routes";
 import classroomRoutes from "./routes/classrooms.routes";
 import activitiesRoutes from "./routes/activites.routes";
+import chatRoutes from "./routes/chat.routes";
 
 const app = fastify();
 
@@ -24,6 +25,7 @@ async function main() {
   app.register(studentRoutes, { prefix: "/student" });
   app.register(classroomRoutes, { prefix: "/classroom" });
   app.register(activitiesRoutes, { prefix: "/activities" });
+  app.register(chatRoutes, { prefix: "/chat" });
 
   try {
     await app.listen({ port });
