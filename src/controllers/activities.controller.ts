@@ -17,15 +17,11 @@ export async function createActivity(
   }>,
   reply: FastifyReply
 ) {
-  const { id } = request.user;
-  const { classroomId } = request.params;
-
   if (request.user.role !== "teacher") {
     return reply.status(403).send({ error: "Acesso negado" });
   }
 
   const parsed = createActivitySchema.safeParse(request.body);
-
   if (!parsed.success) {
     return reply.status(400).send({
       error: "Dados inválidos",
@@ -33,14 +29,13 @@ export async function createActivity(
     });
   }
 
+  const { id: teacherId } = request.user;
+  const { classroomId } = request.params;
   const { title, description, type, dueDate, fileUrl } = parsed.data;
 
   try {
     const classroom = await prisma.classroom.findFirst({
-      where: {
-        id: classroomId,
-        teacherId: id,
-      },
+      where: { id: classroomId, teacherId },
     });
 
     if (!classroom) {
@@ -55,7 +50,7 @@ export async function createActivity(
         fileUrl,
         dueDate: dueDate ? new Date(dueDate) : undefined,
         classroomId,
-        teacherId: id,
+        teacherId,
       },
       select: {
         id: true,
@@ -68,27 +63,20 @@ export async function createActivity(
     });
 
     const students = await prisma.student.findMany({
-      where: {
-        classrooms: {
-          some: {
-            classroomId: classroomId,
-          },
-        },
-      },
+      where: { classrooms: { some: { classroomId } } },
       select: { id: true },
     });
 
-    if (students.length === 0) {
-      console.warn(`Nenhum aluno encontrado para a turma ${classroomId}`);
+    if (students.length > 0) {
+      await prisma.activitySubmission.createMany({
+        data: students.map((student) => ({
+          studentId: student.id,
+          activityId: activity.id,
+          status: "PENDING",
+        })),
+        skipDuplicates: true,
+      });
     }
-
-    await prisma.activitySubmission.createMany({
-      data: students.map((student) => ({
-        studentId: student.id,
-        activityId: activity.id,
-        status: "PENDING",
-      })),
-    });
 
     return reply.status(201).send({ success: true, activity });
   } catch (error) {

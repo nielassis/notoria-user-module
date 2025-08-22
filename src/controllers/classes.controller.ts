@@ -62,6 +62,22 @@ export async function insertStudentInClassroom(
       },
     });
 
+    const activities = await prisma.activity.findMany({
+      where: { classroomId },
+      select: { id: true },
+    });
+
+    if (activities.length > 0) {
+      await prisma.activitySubmission.createMany({
+        data: activities.map((activity) => ({
+          studentId,
+          activityId: activity.id,
+          status: "PENDING",
+        })),
+        skipDuplicates: true,
+      });
+    }
+
     return reply
       .status(200)
       .send({ success: true, message: "Aluno inserido com sucesso" });
