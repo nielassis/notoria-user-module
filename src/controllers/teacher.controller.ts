@@ -12,6 +12,7 @@ import {
 } from "../objects/student.schema";
 import { generatePassword } from "../lib/generateStudentPassword";
 import { StudentIdParams } from "../interfaces/student.interfaces";
+import { sendWelcomeEmail } from "../services/sendWelcomeEmail.service";
 
 export async function createTeacher(
   request: FastifyRequest,
@@ -291,6 +292,22 @@ export async function createStudent(
         teacherId,
       },
     });
+
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: teacherId },
+      select: { name: true },
+    });
+
+    await sendWelcomeEmail(
+      {
+        name: student.name,
+        email: student.email,
+        password: plainPassword,
+      },
+      {
+        name: teacher?.name || "Seu Professor",
+      }
+    );
 
     return reply
       .status(201)
