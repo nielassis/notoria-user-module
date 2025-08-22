@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ClassesIdParams } from "../interfaces/classes.interfaces";
 import prisma from "../lib/prisma";
-import { updateClassesSchema } from "../objects/classes.schema";
 
 export async function insertStudentInClassroom(
   request: FastifyRequest<{
@@ -137,85 +136,6 @@ export async function removeStudentFromClassroom(
   }
 }
 
-export async function updateStudentScoreInClassroom(
-  request: FastifyRequest<{
-    Params: ClassesIdParams;
-  }>,
-  reply: FastifyReply
-) {
-  const { id } = request.user;
-  const { classroomId, studentId } = request.params;
-
-  if (request.user.role !== "teacher") {
-    return reply.status(403).send({ error: "Acesso negado" });
-  }
-
-  const parsedBody = updateClassesSchema.safeParse(request.body);
-
-  if (!parsedBody.success) {
-    return reply.status(400).send({
-      error: "Dados inválidos",
-      details: parsedBody.error.flatten(),
-    });
-  }
-
-  const { score } = parsedBody.data;
-
-  try {
-    const classroom = await prisma.classroom.findFirst({
-      where: {
-        id: classroomId,
-        teacherId: id,
-      },
-    });
-
-    if (!classroom) {
-      return reply.status(404).send({ error: "Turma nao encontrada" });
-    }
-
-    const student = await prisma.student.findFirst({
-      where: {
-        id: studentId,
-        teacherId: id,
-      },
-    });
-
-    if (!student) {
-      return reply.status(404).send({ error: "Aluno nao encontrado" });
-    }
-
-    const studentClassroom = await prisma.studentClassroom.findFirst({
-      where: {
-        studentId,
-        classroomId,
-      },
-    });
-
-    if (!studentClassroom) {
-      return reply
-        .status(404)
-        .send({ error: "Aluno nao encontrado nesta turma" });
-    }
-
-    await prisma.studentClassroom.update({
-      where: {
-        id: studentClassroom.id,
-      },
-      data: {
-        score,
-      },
-    });
-
-    return reply.status(200).send({
-      success: true,
-      message: "Nota atualizada com sucesso",
-    });
-  } catch (error) {
-    console.error("Erro ao atualizar nota do aluno na turma:", error);
-    return reply.status(500).send({ error: "Erro interno do servidor" });
-  }
-}
-
 export async function getStudentsInClassroom(
   request: FastifyRequest<{
     Params: ClassesIdParams;
@@ -253,7 +173,6 @@ export async function getStudentsInClassroom(
             email: true,
           },
         },
-        score: true,
       },
     });
 

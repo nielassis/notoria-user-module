@@ -12,7 +12,6 @@ import {
   getStudentsInClassroom,
   insertStudentInClassroom,
   removeStudentFromClassroom,
-  updateStudentScoreInClassroom,
 } from "../controllers/classes.controller";
 
 export default async function classroomRoutes(server: FastifyInstance) {
@@ -39,11 +38,6 @@ export default async function classroomRoutes(server: FastifyInstance) {
     privateRoutes.delete(
       "/classes/:classroomId/:studentId",
       removeStudentFromClassroom
-    );
-
-    privateRoutes.put(
-      "/classes/:classroomId/:studentId",
-      updateStudentScoreInClassroom
     );
 
     privateRoutes.get("/classes/:classroomId", getStudentsInClassroom);

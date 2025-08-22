@@ -51,7 +51,6 @@ model StudentClassroom {
   studentId   String
   classroom   Classroom @relation(fields: [classroomId], references: [id])
   classroomId String
-  score       Float?
 }
 
 model Activity {
