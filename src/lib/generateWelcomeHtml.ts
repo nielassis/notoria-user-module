@@ -1,5 +1,6 @@
 export function generateWelcomeEmailHtml(
   student: string,
+  studentEmail: string,
   teacher: string,
   password: string
 ) {
@@ -28,7 +29,7 @@ export function generateWelcomeEmailHtml(
 
         <h3 style="margin-top: 30px; color: #4f46e5;">Suas credenciais:</h3>´
         <p style="font-size: 16px; margin: 5px 0;">Sugerimos que altere a sua senha nas configurações de perfil após o seu primeiro acesso.</strong></p>
-        <p style="font-size: 16px; margin: 5px 0;">Email: <strong>${student}</strong></p>
+        <p style="font-size: 16px; margin: 5px 0;">Email: <strong>${studentEmail}</strong></p>
         <p style="font-size: 16px; margin: 5px 0;">Senha provisória: <strong>${password}</strong></p>
 
         <div style="text-align: center; margin-top: 20px;">

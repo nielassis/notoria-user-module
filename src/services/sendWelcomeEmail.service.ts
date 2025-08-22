@@ -19,6 +19,7 @@ export async function sendWelcomeEmail(
     subject: "Bem-vindo ao Notoria!",
     html: generateWelcomeEmailHtml(
       student.name,
+      student.email,
       teacher.name,
       student.password
     ),
