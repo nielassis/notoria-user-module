@@ -33,7 +33,7 @@ export function generateWelcomeEmailHtml(
         <p style="font-size: 16px; margin: 5px 0;">Senha provisória: <strong>${password}</strong></p>
 
         <div style="text-align: center; margin-top: 20px;">
-          <a href="https://notoria-edu.vercell.app/login" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          <a href="https://notoria-edu.vercel.app/login" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;">
             Entrar com minha conta no Notoria
           </a>
         </div>
